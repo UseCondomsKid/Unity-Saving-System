@@ -24,12 +24,16 @@ public class SavingTest : MonoBehaviour
 
     private void Start()
     {
-        if (!SaveManager.SaveSlotExists("deez_nuts"))
+        if (!SaveManager.SaveSlotExists("save_1"))
         {
-            SaveManager.CreateSaveSlot("deez_nuts");
+            SaveManager.CreateSaveSlot("save_1");
+        }
+        if (!SaveManager.SaveSlotExists("save_2"))
+        {
+            SaveManager.CreateSaveSlot("save_2");
         }
         
-        SaveManager.SetActiveSaveSlot("deez_nuts", false, false);
+        SaveManager.SetActiveSaveSlot("save_1", false, true);
     }
 
     void Update()
@@ -46,15 +50,20 @@ public class SavingTest : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.A))
         {
-            SaveManager.SetActiveSaveSlot("deez_nuts", false, true);
+            SaveManager.SetActiveSaveSlot("save_1", false, true);
         }
         if (Input.GetKeyDown(KeyCode.Z))
         {
-            if (!SaveManager.SaveSlotExists("amen"))
-            {
-                SaveManager.CreateSaveSlot("amen");
-            }
-            SaveManager.SetActiveSaveSlot("amen", false, true);
+            SaveManager.SetActiveSaveSlot("save_2", false, true);
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            SaveManager.SetString("test", "Hello from the other side");
+        }
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            Debug.Log(SaveManager.GetString("test"));
         }
 
         if (Input.GetKeyDown(KeyCode.O))

@@ -42,6 +42,7 @@ namespace Saving
 
         public void LoadState(object _state)
         {
+            if (_state == null) return;
             var state = (Dictionary<string, object>)_state;
 
             foreach (var saveable in GetComponentsInChildren<ISaveable>())

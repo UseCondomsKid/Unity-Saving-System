@@ -23,6 +23,8 @@ namespace Saving
 
         private static List<Saveable> saveables;
 
+        private static Dictionary<string, object> keyValueDict;
+
         private static string path => Application.persistentDataPath + "/" + SaveSettings.Get().saveFolder + "/" + activeSaveSlot.slotName + SaveSettings.Get().saveFileExtension;
         private static SaveSlot activeSaveSlot = null;
         public static event Action OnSave;
@@ -156,7 +158,7 @@ namespace Saving
 
             activeSaveSlot = slot;
             OnSwitchedSaveSlot?.Invoke();
-            
+
             LogInfo("Save Slot [" + _name + "] is now active!");
             
             if (_loadNewSlot) Load();
@@ -183,38 +185,66 @@ namespace Saving
 
         public static void DeleteKey(string _key)
         {
-            PlayerPrefs.DeleteKey(_key + activeSaveSlot.slotName);
+            if (keyValueDict == null)
+            {
+                keyValueDict = new Dictionary<string, object>();
+                return;
+            }
+            keyValueDict.Remove(_key);
         }
         public static bool HasKey(string _key)
         {
-            return PlayerPrefs.HasKey(_key + activeSaveSlot.slotName);
+            if (keyValueDict == null)
+            {
+                keyValueDict = new Dictionary<string, object>();
+                return false;
+            }
+            return keyValueDict.ContainsKey(_key);
         }
 
         public static void SetInt(string _key, int _value)
         {
-            PlayerPrefs.SetInt(_key + activeSaveSlot.slotName, _value);
+            if (keyValueDict == null)
+            {
+                keyValueDict = new Dictionary<string, object>();
+            }
+            keyValueDict[_key] = _value;
         }
         public static int GetInt(string _key)
         {
-            return PlayerPrefs.GetInt(_key + activeSaveSlot.slotName);
+            object obj;
+            keyValueDict.TryGetValue(_key, out obj);
+            return (int)obj;
         }
 
         public static void SetFloat(string _key, float _value)
         {
-            PlayerPrefs.SetFloat(_key + activeSaveSlot.slotName, _value);
+            if (keyValueDict == null)
+            {
+                keyValueDict = new Dictionary<string, object>();
+            }
+            keyValueDict[_key] = _value;
         }
         public static float GetFloat(string _key)
         {
-            return PlayerPrefs.GetFloat(_key + activeSaveSlot.slotName);
+            object obj;
+            keyValueDict.TryGetValue(_key, out obj);
+            return (float)obj;
         }
         
         public static void SetString(string _key, string _value)
         {
-            PlayerPrefs.SetString(_key + activeSaveSlot.slotName, _value);
+            if (keyValueDict == null)
+            {
+                keyValueDict = new Dictionary<string, object>();
+            }
+            keyValueDict[_key] = _value;
         }
         public static string GetString(string _key)
         {
-            return PlayerPrefs.GetString(_key + activeSaveSlot.slotName);
+            object obj;
+            keyValueDict.TryGetValue(_key, out obj);
+            return (string)obj;
         }
 
 # endregion
@@ -272,9 +302,16 @@ namespace Saving
 
         private static void SaveState(Dictionary<string, object> _state)
         {
+            if (saveables == null) saveables = new List<Saveable>();
             foreach (var saveable in saveables)
             {
                 _state[saveable.Id] = saveable.SaveState();
+            }
+
+            if (keyValueDict == null) keyValueDict = new Dictionary<string, object>();
+            foreach (var pair in keyValueDict)
+            {
+                _state[pair.Key] = pair.Value;
             }
 
             _state[activeSaveSlot.slotName + SaveSettings.Get().saveFileExtension] = SaveActiveSlotData();
@@ -282,15 +319,37 @@ namespace Saving
         
         private static void LoadState(Dictionary<string, object> _state)
         {
+            if (saveables == null) saveables = new List<Saveable>();
             foreach (var saveable in saveables)
             {
                 if (_state.TryGetValue(saveable.Id, out object savedState))
                 {
                     saveable.LoadState(savedState);
                 }
-            } 
+                else
+                {
+                    saveable.LoadState(null);
+                }
+            }
+
+            if (keyValueDict == null) keyValueDict = new Dictionary<string, object>();
+
+            List<KeyValuePair<string, object>> _keyValueDict = new List<KeyValuePair<string, object>>();
+            _keyValueDict.AddRange(keyValueDict);
+
+            foreach (var pair in _keyValueDict)
+            {
+                if (_state.TryGetValue(pair.Key, out object savedState))
+                {
+                    keyValueDict[pair.Key] = savedState;
+                }
+                else
+                {
+                    keyValueDict[pair.Key] = null;
+                }
+            }
         }
-        
+
 # region Debugging
 
     private static void LogInfo(string _msg)

@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Dialogue Settings
   m_EditorClassIdentifier: 
   saveFolder: saves
-  saveFileExtension: .ligma
-  debugSystem: 1
+  saveFileExtension: .save
+  debug: 1
