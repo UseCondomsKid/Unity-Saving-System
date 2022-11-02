@@ -25,7 +25,7 @@ public class SaveSettings : ScriptableObject
             return Instance;
         }
 
-        var saveSettings = Resources.Load("Dialogue Settings", typeof(SaveSettings)) as SaveSettings;
+        var saveSettings = Resources.Load("Save Settings", typeof(SaveSettings)) as SaveSettings;
 
 #if UNITY_EDITOR
         // In case the settings are not found, we create one
@@ -38,7 +38,7 @@ public class SaveSettings : ScriptableObject
         // In case it still doesn't exist, somehow it got removed.
         if (saveSettings == null)
         {
-            Debug.LogWarning("Could not find SavePluginsSettings in resource folder, did you remove it? Using default settings.");
+            Debug.LogWarning("Could not find the Save Settings asset in resource folder, did you remove it? Going to use default settings.");
             saveSettings = ScriptableObject.CreateInstance<SaveSettings>();
         }
 
@@ -52,7 +52,7 @@ public class SaveSettings : ScriptableObject
     public static SaveSettings CreateFile()
     {
         string resourceFolderPath = string.Format("{0}/{1}", Application.dataPath, "Resources");
-        string filePath = string.Format("{0}/{1}", resourceFolderPath, "Dialogue Settings.asset");
+        string filePath = string.Format("{0}/{1}", resourceFolderPath, "Save Settings.asset");
 
         // In case the directory doesn't exist, we create a new one.
         if (!Directory.Exists(resourceFolderPath))
@@ -65,7 +65,7 @@ public class SaveSettings : ScriptableObject
         if (!File.Exists(filePath))
         {
             Instance = ScriptableObject.CreateInstance<SaveSettings>();
-            UnityEditor.AssetDatabase.CreateAsset(Instance, "Assets/Resources/Dialogue Settings.asset");
+            UnityEditor.AssetDatabase.CreateAsset(Instance, "Assets/Resources/Save Settings.asset");
             UnityEditor.AssetDatabase.SaveAssets();
             UnityEditor.AssetDatabase.Refresh();
 
@@ -73,7 +73,7 @@ public class SaveSettings : ScriptableObject
         }
         else
         {
-            return Resources.Load("Dialogue Settings", typeof(SaveSettings)) as SaveSettings;
+            return Resources.Load("Save Settings", typeof(SaveSettings)) as SaveSettings;
         }
     }
 # endif
