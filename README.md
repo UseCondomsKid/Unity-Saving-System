@@ -1,6 +1,14 @@
 # Unity Advanced Saving System
 I needed a way to save and loading data efficiently in unity, so I decided to put in some time to create this saving system, and it turned out great! Let me show you how it works.
 
+## Installation
+- Clone this repository to your machine
+- Navigate to the "Assets" folder
+- Copy and paste the "Save System" folder found in the "Assets" folder to your Unity project
+- That's it!
+
+Let Unity compile everything, and once that's done, follow along to know how this plugin works.
+
 ## How it works
 
 - [Creating an ``ISaveable``](#creating-an-isaveable)
