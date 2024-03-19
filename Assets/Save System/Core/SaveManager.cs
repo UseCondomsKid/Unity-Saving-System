@@ -14,7 +14,6 @@ namespace Saving
         public int currentSceneIndex;
         public string creationDate;
         public string timePlayed;
-        // public string progress;
     }
     
     public static class SaveManager
@@ -30,9 +29,11 @@ namespace Saving
         public static event Action OnSave;
         public static event Action OnLoad;
         public static event Action OnSwitchedSaveSlot;
-# endregion
 
-# region Public Functions
+        public static SaveSlot ActiveSaveSlot { get { return activeSaveSlot; } }
+        #endregion
+
+        #region Public Functions
         public static void Save()
         {
             if (activeSaveSlot == null)
@@ -73,7 +74,7 @@ namespace Saving
         {
             SaveSlot slot = new SaveSlot();
             slot.slotName = _name;
-            slot.creationDate = DateTime.Now.ToString();
+            slot.creationDate = DateTime.Now.ToString("MM/dd/yyyy\nhh:mm tt");
             slot.currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
             slot.timePlayed = "00:00:00";
 
@@ -88,6 +89,28 @@ namespace Saving
 
             activeSaveSlot = previousSlot;
         }
+        public static void CopyActiveSaveSlot(string _name)
+        {
+            var destPath = Application.persistentDataPath + "/" + SaveSettings.Get().saveFolder + "/" + _name + SaveSettings.Get().saveFileExtension;
+            File.Copy(path, destPath);
+
+            SaveSlot slot = new SaveSlot();
+            slot.slotName = _name;
+            slot.creationDate = DateTime.Now.ToString("MM/dd/yyyy\nhh:mm tt");
+            slot.currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+            slot.timePlayed = activeSaveSlot.timePlayed;
+
+            var state = LoadFile();
+
+            var previousSlot = activeSaveSlot;
+            activeSaveSlot = slot;
+            state[_name + SaveSettings.Get().saveFileExtension] = activeSaveSlot;
+            SaveFile(state);
+
+            LogInfo("Save Slot [" + _name + "] Copied from [" + previousSlot.slotName + "] and Created!");
+
+            activeSaveSlot = previousSlot;
+        }
 
         public static void DeleteSaveSlot(string _name)
         {
@@ -95,27 +118,6 @@ namespace Saving
             File.Delete(p);
             
             LogInfo("Save Slot [" + _name + "] Deleted!");
-        }
-
-        public static List<SaveSlot> GetSaveSlots()
-        {
-            List<SaveSlot> slots = new List<SaveSlot>();
-            var state = LoadFile();
-
-            DirectoryInfo info =
-                new DirectoryInfo(Application.persistentDataPath + "/" + SaveSettings.Get().saveFolder + "/");
-
-            FileInfo[] files = info.GetFiles("*" + SaveSettings.Get().saveFileExtension);
-
-            foreach (var slot in files)
-            {
-                if (state.TryGetValue(slot.Name, out object slotData))
-                {
-                    slots.Add((SaveSlot)slotData);
-                }
-            }
-
-            return slots;
         }
 
         public static SaveSlot GetSaveSlot(string _name)
@@ -155,6 +157,8 @@ namespace Saving
             if (slot == null) return false;
             
             if (_savePreviousSlot) Save();
+
+            keyValueDict = new Dictionary<string, object>();
 
             activeSaveSlot = slot;
             OnSwitchedSaveSlot?.Invoke();
@@ -213,8 +217,15 @@ namespace Saving
         public static int GetInt(string _key)
         {
             object obj;
-            keyValueDict.TryGetValue(_key, out obj);
-            return (int)obj;
+            if (keyValueDict == null)
+            {
+                obj = null;
+            }
+            else
+            {
+                keyValueDict.TryGetValue(_key, out obj);
+            }
+            return obj == null ? -1 : (int)obj;
         }
 
         public static void SetFloat(string _key, float _value)
@@ -228,10 +239,16 @@ namespace Saving
         public static float GetFloat(string _key)
         {
             object obj;
-            keyValueDict.TryGetValue(_key, out obj);
-            return (float)obj;
+            if (keyValueDict == null)
+            {
+                obj = null;
+            }
+            else
+            {
+                keyValueDict.TryGetValue(_key, out obj);
+            }
+            return obj == null ? float.NegativeInfinity : (float)obj;
         }
-        
         public static void SetString(string _key, string _value)
         {
             if (keyValueDict == null)
@@ -243,13 +260,18 @@ namespace Saving
         public static string GetString(string _key)
         {
             object obj;
-            keyValueDict.TryGetValue(_key, out obj);
-            return (string)obj;
+            if (keyValueDict == null)
+            {
+                obj = null;
+            }
+            else
+            {
+                keyValueDict.TryGetValue(_key, out obj);
+            }
+            return obj == null ? string.Empty : (string)obj;
         }
 
 # endregion
-        
-
 # endregion
         
 # region Private Functions
@@ -308,17 +330,20 @@ namespace Saving
                 _state[saveable.Id] = saveable.SaveState();
             }
 
+            _state["key_value_pairs_start"] = 0;
             if (keyValueDict == null) keyValueDict = new Dictionary<string, object>();
             foreach (var pair in keyValueDict)
             {
                 _state[pair.Key] = pair.Value;
             }
+            _state["key_value_pairs_end"] = 0;
 
             _state[activeSaveSlot.slotName + SaveSettings.Get().saveFileExtension] = SaveActiveSlotData();
         }
         
         private static void LoadState(Dictionary<string, object> _state)
         {
+            // Saveables
             if (saveables == null) saveables = new List<Saveable>();
             foreach (var saveable in saveables)
             {
@@ -332,12 +357,28 @@ namespace Saving
                 }
             }
 
+            // Key Value Stuff
             if (keyValueDict == null) keyValueDict = new Dictionary<string, object>();
 
-            List<KeyValuePair<string, object>> _keyValueDict = new List<KeyValuePair<string, object>>();
-            _keyValueDict.AddRange(keyValueDict);
+            bool foundKeyValueStart = false;
+            List<KeyValuePair<string, object>> keyValueSection = new List<KeyValuePair<string, object>>();
+            foreach (var kvp in _state)
+            {
+                if (kvp.Key == "key_value_pairs_start")
+                {
+                    foundKeyValueStart = true;
+                }
+                else if (kvp.Key == "key_value_pairs_end")
+                {
+                    break;
+                }
+                else if (foundKeyValueStart)
+                {
+                    keyValueSection.Add(kvp);
+                }
+            }
 
-            foreach (var pair in _keyValueDict)
+            foreach (var pair in keyValueSection)
             {
                 if (_state.TryGetValue(pair.Key, out object savedState))
                 {

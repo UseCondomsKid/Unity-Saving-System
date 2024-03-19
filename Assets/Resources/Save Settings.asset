@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 50455dcca7c1a937e9a0eb59e32ceb68, type: 3}
-  m_Name: Dialogue Settings
+  m_Name: Save Settings
   m_EditorClassIdentifier: 
   saveFolder: saves
-  saveFileExtension: .save
+  saveFileExtension: .ligma
   debug: 1

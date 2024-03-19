@@ -8,22 +8,26 @@ namespace Saving
     {
         [SerializeField] private string id;
         public string Id => id;
-        
-# region Unity Functions
+
+        #region Unity Functions
 
         private void Awake()
         {
+            if (id == null || id == string.Empty || id == "") return;
+
             SaveManager.AddSaveable(this);
         }
 
         private void OnDestroy()
         {
-            SaveManager.RemoveSaveable(this);            
-        }
-# endregion
+            if (id == null || id == string.Empty || id == "") return;
 
-        
-# region Public Functions
+            SaveManager.RemoveSaveable(this);
+        }
+        #endregion
+
+
+        #region Public Functions
         public void GenerateId()
         {
             id = Guid.NewGuid().ToString();
@@ -54,6 +58,6 @@ namespace Saving
                 }
             }
         }
-# endregion
+        #endregion
     }
 }

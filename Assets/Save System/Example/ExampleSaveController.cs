@@ -5,9 +5,9 @@ using Saving;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SavingTest : MonoBehaviour
+public class ExampleSaveController : MonoBehaviour
 {
-    private static SavingTest instance;
+    private static ExampleSaveController instance;
 
     private void Awake()
     {
@@ -18,7 +18,7 @@ public class SavingTest : MonoBehaviour
         }
         else
         {
-            Destroy(this);
+            Destroy(this.gameObject);
         }
     }
 
@@ -48,29 +48,29 @@ public class SavingTest : MonoBehaviour
             SaveManager.Load();
         }
 
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             SaveManager.SetActiveSaveSlot("save_1", false, true);
         }
-        if (Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetKeyDown(KeyCode.W))
         {
             SaveManager.SetActiveSaveSlot("save_2", false, true);
         }
 
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
-            SaveManager.SetString("test", "Hello from the other side");
+            SaveManager.SetString("test", "Hello World");
         }
         if (Input.GetKeyDown(KeyCode.X))
         {
             Debug.Log(SaveManager.GetString("test"));
         }
 
-        if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(KeyCode.J))
         {
             SceneManager.LoadScene(0);
         }
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.K))
         {
             SceneManager.LoadScene(1);
         }

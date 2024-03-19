@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TestOne : MonoBehaviour, ISaveable
+public class ExampleSaveableMonoBehaviour : MonoBehaviour, ISaveable
 {
     [Serializable]
     private struct Data
