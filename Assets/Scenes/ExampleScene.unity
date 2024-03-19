@@ -441,7 +441,7 @@ GameObject:
   - component: {fileID: 1935131665}
   - component: {fileID: 1935131667}
   m_Layer: 0
-  m_Name: Example Saveable MonoBehaviour
+  m_Name: Example Player Class
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -487,8 +487,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71dacf1317c0546a4bd21d7f6030b910, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _name: Hello
   health: 100
+  speed: 10.5
 --- !u!1 &2083402748
 GameObject:
   m_ObjectHideFlags: 0
